@@ -76,7 +76,8 @@ def strategy_five(pDf,colName):
 
 def demandRevenue(dataframe, colName):
     df =  dataframe.copy(deep=True)
-    df['Demand'+colName]=100-0.7*df[colName]+0.5*(df["Grand Total"]-df[colName])
+    # df['Demand'+colName]=100-0.7*df[colName]+0.5*(df["Grand Total"]-df[colName])
+    df['Demand'+colName]=df.apply(lambda x: max(0,(100-0.7*x[colName]+0.5*(x["Grand Total"]-x[colName]))),axis =1) 
     df['Revenue'+colName]=df['Demand'+colName]*df[colName]
     return df
 
@@ -132,7 +133,8 @@ def heatmap(dataframe):
         i=i+1
 
     df_correlation=dftemp.corr()
-    ax = sns.heatmap(df_correlation)
+    ax=plt.figure(figsize=(6, 4), dpi=100)
+    ax = sns.heatmap(df_correlation,annot=True)
     fig_heat = ax.get_figure()
     fig_heat.savefig('./output/heatMap.png')
     fig_heat.show()
@@ -185,4 +187,24 @@ def workflow(PlatName,pid,cstPercnt):
     visualizeRevenue(df7['Revenue'+PlatName],df7['Revenuestrategy1'+PlatName],df7['Revenuestrategy2'+PlatName],df7['Revenuestrategy3'+PlatName],df7['Revenuestrategy4'+PlatName],df7['Revenuestrategy5'+PlatName])
     heatmap(df7)
 
-    # return df7
+    return max_key,max_value
+
+def StrategyDic(key):
+    Sdictionary={
+        'strategy1': 'To use different strategy based on Q3 and Q1/2/4.' ,
+        'strategy2': 'To change the price based on the 5-days rolling average price',
+        'strategy3': 'To maintain the same change rate of its most relevant website.' ,
+        'strategy4': 'To change the price based on 2rd strategy and knock out when p <cost.',
+        'strategy5': 'To maintain the same volatility of the corresponding Category Index.'
+    }
+    return  Sdictionary[key]
+
+def StrategyName(key):
+    Sdictionary={
+        'Strategy1': 'Time Segment Strategy' ,
+        'Strategy2': 'Average Strategy',
+        'Strategy3': 'Single Competitor Strategy' ,
+        'Strategy4': 'Cost & Average Strategy',
+        'Strategy5': 'Index Strategy'
+    }
+    return  Sdictionary[key]
